@@ -1,12 +1,22 @@
-from flask import Blueprint, jsonify, request
+from flask import Blueprint, jsonify, request, render_template, redirect
 from sqlalchemy import exc
 
 from project.api.models import User
 from project import db
 
 
-users_blueprint = Blueprint('users', __name__)
+users_blueprint = Blueprint('users', __name__, template_folder='./templates')
 
+@users_blueprint.route('/', methods=['GET', 'POST'])
+def index():
+    if request.method == 'POST':
+        username = request.form['username']
+        email = request.form['email']
+        db.session.add(User(username, email))
+        db.session.commit()
+        return redirect('/')
+    users = User.query.all()
+    return render_template('index.html', users=users)
 
 @users_blueprint.route('/users/ping', methods=['GET'])
 def ping_pong():
